@@ -1,0 +1,37 @@
+ Hiring at Roxiler Systems - Deadline: 24/6/2024 - 10 am!
+
+We are delighted to offer an internship opportunity for talented individuals proficient in MERN Stack Technology. This internship program will run for 6 months, with the potential for a full-time position based on your performance.
+
+Location: Baner, Pune
+
+Duration: 6 months (with possibility of full-time offer based on performance)
+
+Stipend : 10K
+
+CTC : 3-5 LPA
+
+What We're Seeking:
+
+Strong grasp of Node.js, React.js, MongoDB, Express.js
+Eagerness to learn and thrive in a dynamic environment.
+Excellent problem-solving skills and attention to detail.
+
+How to Apply:
+
+📍Complete a MERN stack challenge within 2 days (24/6/2024 - 10 am).
+
+📍Challenge details can be found here: Refer to the pdf attached below
+
+📍Upload your completed code to GitHub.
+
+📍 Email the GitHub repository link to eesha.patro@roxiler.com with
+Subject in the mail as [MERN Stack assignment solution] (mandatory)
+
+Rounds of interview:
+
+📍Assignment Round
+📍Technical Round
+📍Live Coding Round
+📍HR Round
+
+Candidates demonstrating exceptional performance in the challenge will be shortlisted for further interview rounds.
