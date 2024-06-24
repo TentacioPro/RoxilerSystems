@@ -29,10 +29,11 @@ app.use(express.json());
 //     };
 // };
 
+var port = process.env.PORT || 6000;
 
 //Express Server
-app.listen(3000, () => {
-    console.log('Server running on port 3000');
+app.listen(6000, () => {
+    console.log('Server running on port 6000');
 });
 
 
@@ -91,42 +92,89 @@ app.get('/transactionslist', async(req,res) => {
 });
 
 
-//Display Statistics
-app.get('/stat', async (req,res) => {
-    const {month} = req.query;
-    try {
-        if(!month) {
-            return res.status(400).json({ error: 'Month parameter is required'});
-        }
-        const matchStage ={
-            $match: {
-                 $expr: { $eq: [{ $month:'$dateOfSale' }, parseInt(month)] }
-            }
-        };
+//BarChart
+app.get('/bar-chart', async (req, res) => {
+    const { month } = req.query;
+    const query = { dateOfSale: { $month: month } };
+    const priceRanges = [
+      { $lte: 100 },
+      { $gt: 100, $lte: 200 },
+      { $gt: 200, $lte: 300 },
+      { $gt: 300, $lte: 400 },
+      { $gt: 400, $lte: 500 },
+      { $gt: 500, $lte: 600 },
+      { $gt: 600, $lte: 700 },
+      { $gt: 700, $lte: 800 },
+      { $gt: 800, $lte: 900 },
+      { $gt: 900 }
+    ];
+    const data = await Promise.all(priceRanges.map(async (range, index) => {
+      const count = await ProductTransaction.countDocuments({...query, price: range });
+      return { label: `${index * 100} - ${index * 100 + 100}`, value: count };
+    }));
+    res.json(data);
+  });
 
-        const totalSaleAmountPipeline =[
-            matchStage,
-            {
-                $group: {
-                    _id: null,
-                    totalSaleAmount: { $sum: '$price' }
-                }
-            }
-        ];
-        const totalSaleAmountResult = await ProductTransaction.aggregate(totalSaleAmountPipeline);
-        const totalSoldItems = await ProductTransaction.countDocuments({ ...matchStage.$match, sold:true});
-        const totalNotSoldItems = await ProductTransaction.countDocuments({
-            ...matchStage.$match,price:0,sold: false
 
-        });
-        res.json({
-            totalSaleAmount: totalSaleAmountResult.length > 0 ? totalSaleAmountResult[0].totalSaleAmount : 0,
-            totalSoldItems,
-            totalNotSoldItems
-        });
-    } catch(err) {
-        console.error('Error fetching stat', err);
-        res.status(500).send('Error fetching stat');
-    }
+//PieChart
+app.get('/pie-chart', async (req, res) => {
+    const { month } = req.query;
+    const query = { dateOfSale: { $month: month } };
+    const categories = await ProductTransaction.aggregate([
+      { $match: query },
+      { $group: { _id: '$category', count: { $sum: 1 } } }
+    ]);
+    res.json(categories);
+  });
 
+
+//Combined
+app.get('/combined', async (req, res) => {
+  const { month } = req.query;
+  const transactions = await ProductTransaction.find({ dateOfSale: { $month: month } });
+  const statistics = await statisticsAPI(month);
+  const barChart = await barChartAPI(month);
+  const pieChart = await pieChartAPI(month);
+  res.json({ transactions, statistics, barChart, pieChart });
 });
+
+// //Display Statistics
+// app.get('/stat', async (req,res) => {
+//     const {month} = req.query;
+//     try {
+//         if(!month) {
+//             return res.status(400).json({ error: 'Month parameter is required'});
+//         }
+//         const matchStage ={
+//             $match: {
+//                  $expr: { $eq: [{ $month:'$dateOfSale' }, parseInt(month)] }
+//             }
+//         };
+
+//         const totalSaleAmountPipeline =[
+//             matchStage,
+//             {
+//                 $group: {
+//                     _id: null,
+//                     totalSaleAmount: { $sum: '$price' }
+//                 }
+//             }
+//         ];
+//         const totalSaleAmountResult = await ProductTransaction.aggregate(totalSaleAmountPipeline);
+//         const totalSoldItems = await ProductTransaction.countDocuments({ ...matchStage.$match, sold:true});
+//         const totalNotSoldItems = await ProductTransaction.countDocuments({
+//             ...matchStage.$match,price:0,sold: false
+
+//         });
+//         res.json({
+//             totalSaleAmount: totalSaleAmountResult.length > 0 ? totalSaleAmountResult[0].totalSaleAmount : 0,
+//             totalSoldItems,
+//             totalNotSoldItems
+//         });
+//     } catch(err) {
+//         console.error('Error fetching stat', err);
+//         res.status(500).send('Error fetching stat');
+//     }
+
+// });
+

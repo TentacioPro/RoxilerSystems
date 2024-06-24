@@ -12,6 +12,7 @@ const productTransactionSchema = new Schema ({
     dateOfSale: Date
 });
 
+productTransactionSchema.index({ dateOfSale: 1});
 const ProductTransaction = mongoose.model('ProductTransaction', productTransactionSchema);
 
 export {ProductTransaction};
